@@ -1,14 +1,18 @@
 'use strict'
 
-const Hapi   = require('hapi')
-const Cookie = require('hapi-auth-cookie')
-// const Basic = require('hapi-auth-basic')
-const Joi    = require('joi')
-const Inert  = require('inert')
-const Good   = require('good')
+const
+    Hapi   = require('hapi'),
+    Cookie = require('hapi-auth-cookie'),
+    // Basic = require('hapi-auth-basic'),
+    Joi    = require('joi'),
+    Inert  = require('inert'),
+    Good   = require('good'),
+    ;
 
-const Bcrypt = require('bcrypt')
-// const Path   = require('path')
+const
+    Bcrypt = require('bcrypt'),
+    //  Path   = require('path'),
+    ;
 
 const server = new Hapi.Server({
     // connections: {
