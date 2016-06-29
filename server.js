@@ -42,11 +42,9 @@ const signinHandler = (req, rep) => {
     let account = null
 
     if (req.method === 'post') {
-
         if (!req.payload.username || !req.payload.password) {
             message = 'Missing username or password'
-        }
-        else {
+        } else {
             account = users[req.payload.username]
             if (!account || !Bcrypt.compareSync(req.payload.password, account.password)) {
                 message = 'Invalid username or password'
@@ -76,13 +74,29 @@ const signinHandler = (req, rep) => {
             rep(err)
 
         req.cookieAuth.set({sid: sid})
+
         return rep.redirect('/')
     })
 }
 
-// const validate = function (req, username, password, cb) {
+const validate = (request, session, callback) => {
+
+    server.app.cache.get(session.sid, (err, cached) => {
+
+        if (err)
+            return callback(err, false)
+
+        if (!cached)
+            return callback(null, false)
+
+        return callback(null, true, cached.account)
+    })
+}
+
+// const validate = (req, username, password, cb) => {
 //
 //     const user = users[username]
+//
 //     if (!user || (req.params.name && req.params.name !== username)) {
 //         return cb(null, false)
 //     }
@@ -157,19 +171,7 @@ server.register([Cookie/*Basic*/, Inert, {
             password: 'password-should-be-32-characters',
             redirectTo: '/signin',
             isSecure: false,
-            validateFunc: (request, session, callback) => {
-
-                cache.get(session.sid, (err, cached) => {
-
-                    if (err)
-                        return callback(err, false)
-
-                    if (!cached)
-                        return callback(null, false)
-
-                    return callback(null, true, cached.account)
-                })
-            },
+            validateFunc: validate,
         })
         // server.auth.strategy('simple', 'basic', {validateFunc: validate})
 
@@ -184,7 +186,8 @@ server.register([Cookie/*Basic*/, Inert, {
             method: 'GET',
             path: '/{name?}',
             handler: (req, rep) => {
-                rep('Hello, ' + encodeURIComponent(req.auth.credentials.name) + '!')
+                rep('Hello, ' + encodeURIComponent(req.auth.credentials.name) + '! '
+                    + (req.query.content ? req.query.content : ''))
             },
             config: {
                 auth: 'session'/*'simple'*/,
